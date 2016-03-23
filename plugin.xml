@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    id="com.comprovei.plugins.push"
+    version="0.0.1">
+	
+    <name>Push</name>
+    <description>Plugin para recebimento de notificações GCM</description>
+    <license>Apache 2.0</license>
+	
+    <repo></repo>
+    <issue></issue>
+	
+	<engines>
+        <engine name="cordova" version=">=3.0.0" />
+    </engines>
+	
+    <js-module src="www/push.js" name="Push">
+        <clobbers target="Push" />
+    </js-module>
+	
+    <!-- android -->
+    <platform name="android">
+		<config-file target="res/xml/config.xml" parent="/*">
+            <feature name="Push">
+                <param name="android-package" value="com.comprovei.plugins.push.PushPlugin" />
+            </feature>
+        </config-file>
+
+		<source-file src="src/android/com/comprovei/plugins/push/GCMIService.java" target-dir="src/com/comprovei/plugins/push/" />
+		<source-file src="src/android/com/comprovei/plugins/push/PushConstants.java" target-dir="src/com/comprovei/plugins/push/" />
+		<source-file src="src/android/com/comprovei/plugins/push/PushHandlerActivity.java" target-dir="src/com/comprovei/plugins/push/" />
+        <source-file src="src/android/com/comprovei/plugins/push/PushInstanceIDListenerService.java" target-dir="src/com/comprovei/plugins/push/" />
+		<source-file src="src/android/com/comprovei/plugins/push/PushPlugin.java" target-dir="src/com/comprovei/plugins/push/" />
+        <source-file src="src/android/com/comprovei/plugins/push/RegistrationIntentService.java" target-dir="src/com/comprovei/plugins/push/" />
+		
+		<config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+			<uses-permission android:name="android.permission.WAKE_LOCK" />
+            <uses-permission android:name="android.permission.VIBRATE"/>
+			<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+            <permission android:name="$PACKAGE_NAME.permission.C2D_MESSAGE" android:protectionLevel="signature" />
+            <uses-permission android:name="$PACKAGE_NAME.permission.C2D_MESSAGE" />
+		</config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <activity android:name="com.comprovei.plugins.push.PushHandlerActivity" android:exported="true"/>
+            <!-- [START gcm_receiver] -->
+            <receiver
+                android:name="com.google.android.gms.gcm.GcmReceiver"
+                android:exported="true"
+                android:permission="com.google.android.c2dm.permission.SEND" >
+                <intent-filter>
+                    <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                    <category android:name="$PACKAGE_NAME" />
+                </intent-filter>
+            </receiver>
+            <!-- [END gcm_receiver] -->
+
+            <!-- [START gcm_listener] -->
+            <service
+                android:name="com.comprovei.plugins.push.GCMIService"
+                android:exported="false" >
+                <intent-filter>
+                    <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                </intent-filter>
+            </service>
+            <!-- [END gcm_listener] -->
+            <!-- [START instanceId_listener] -->
+            <service
+                android:name="com.comprovei.plugins.push.PushInstanceIDListenerService"
+                android:exported="false">
+                <intent-filter>
+                    <action android:name="com.google.android.gms.iid.InstanceID"/>
+                </intent-filter>
+            </service>
+            <!-- [END instanceId_listener] -->
+            <service
+                android:name="com.comprovei.plugins.push.RegistrationIntentService"
+                android:exported="false">
+            </service>
+        </config-file>
+		
+		<framework src="com.android.support:support-v13:23+" />
+        <framework src="com.google.android.gms:play-services-gcm:+" />
+    </platform>
+</plugin>
